@@ -1,59 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert, ActivityIndicator, Share } from 'react-native';
-import * as groupsApi from '../api/groups';
-import * as friendsApi from '../api/friends';
+import { useInvitarMiembro } from '../viewmodels/useInvitarMiembro';
 
 export default function InvitarMiembro({ route, navigation }: any) {
   const { grupoId, nombre, emoji } = route.params || {};
-  const [inviteData, setInviteData] = useState<any | null>(null);
-  const [loadingInvite, setLoadingInvite] = useState(false);
-  const [friends, setFriends] = useState<any[]>([]);
-  const [loadingFriends, setLoadingFriends] = useState(false);
+  const { inviteData, loadingInvite, friends, loadingFriends, addMember, fetchInvite, fetchFriends } = useInvitarMiembro(grupoId);
   const [addingIds, setAddingIds] = useState<Record<string, boolean>>({});
   const [QRComponent, setQRComponent] = useState<any | null>(null);
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
-    fetchInvite();
-    fetchFriends();
-  }, [grupoId]);
-
-  const fetchInvite = async () => {
-    setLoadingInvite(true);
-    try {
-      const res = await groupsApi.createInviteLink(grupoId);
-      setInviteData(res);
-      // Try to load QR component dynamically (optional dependency)
+    // viewmodel already fetched invite and friends; try QR component import locally
+    const tryLoadQR = async () => {
       try {
         const mod = await import('react-native-qrcode-svg');
-        // some bundlers export default, some named
         const comp = (mod && (mod.default || mod));
         setQRComponent(() => comp);
       } catch (err) {
-        // not available, keep QRComponent null
+
       }
-    } catch (e) {
-      console.error('createInviteLink error', e);
-      setInviteData(null);
-    } finally {
-      setLoadingInvite(false);
-    }
-  };
-
-  const fetchFriends = async () => {
-    setLoadingFriends(true);
-    try {
-      const res = await friendsApi.getFriends();
-      const arr = Array.isArray(res) ? res : res?.friends ?? [];
-      setFriends(arr);
-    } catch (e) {
-      console.error('getFriends error', e);
-      setFriends([]);
-    } finally {
-      setLoadingFriends(false);
-    }
-  };
-
+    };
+    tryLoadQR();
+  }, [grupoId]);
   const copyToClipboard = async (text: string) => {
     // Prefer expo-clipboard (recommended for Expo). Fallback to community clipboard.
     try {
@@ -93,10 +61,10 @@ export default function InvitarMiembro({ route, navigation }: any) {
   const handleAddFriend = async (friendId: string) => {
     setAddingIds(prev => ({ ...prev, [friendId]: true }));
     try {
-      await groupsApi.addMembers(grupoId, [friendId]);
+      await addMember(friendId);
       Alert.alert('Hecho', 'Miembro añadido al grupo');
-      // remove friend from list or mark invited
-      setFriends(prev => prev.filter(f => f.id !== friendId));
+      // refresh friends list
+      fetchFriends();
     } catch (e) {
       console.error('addMembers error', e);
       Alert.alert('Error', 'No se pudo añadir al miembro');

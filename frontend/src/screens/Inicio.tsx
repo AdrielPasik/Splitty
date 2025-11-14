@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -10,14 +10,12 @@ import {
   TouchableOpacity as RNTouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
-import * as groupsApi from '../api/groups';
 import Header from '../components/Header';
+import { useInicio } from '../viewmodels/useInicio';
 
 export default function Inicio({ navigation }: any) {
-  const [groups, setGroups] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [optionsVisible, setOptionsVisible] = useState(false);
+  const { groups, loading, error, refresh } = useInicio();
+  const [optionsVisible, setOptionsVisible] = React.useState(false);
 
   // Calculate total balance from all groups
   const totalBalance = useMemo(() => {
@@ -27,40 +25,14 @@ export default function Inicio({ navigation }: any) {
     }, 0);
   }, [groups]);
 
-  const fetchGroups = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await groupsApi.getMyGroups();
-      // expect an array
-      let groupsArr = Array.isArray(res) ? res : [];
-      // merge local emojis saved on the client
-      try {
-        const { loadGroupEmojis } = await import('../utils/groupEmoji');
-        const map = await loadGroupEmojis();
-        groupsArr = groupsArr.map((g: any) => ({ ...g, emoji: map[g.id] ?? g.emoji ?? '✈️' }));
-      } catch (e) {
-        // if anything fails, just fall back
-        groupsArr = groupsArr.map((g: any) => ({ ...g, emoji: g.emoji ?? '✈️' }));
-      }
-      setGroups(groupsArr);
-    } catch (e: any) {
-      console.error('getMyGroups error', e);
-      setError('Error cargando grupos');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchGroups();
-    const unsubFocus = navigation.addListener('focus', () => fetchGroups());
+    const unsubFocus = navigation.addListener('focus', () => refresh());
     const unsubBlur = navigation.addListener('blur', () => setOptionsVisible(false));
     return () => {
       unsubFocus();
       unsubBlur();
     };
-  }, [navigation]);
+  }, [navigation, refresh]);
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>

@@ -50,6 +50,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log('🔑 Token obtenido, longitud:', idToken.length);
           setToken(idToken);
           setAuthToken(idToken);
+          // Verificar que el usuario exista en el backend; si no, cerrar sesión local
+          try {
+            // importar la función getCurrentUser de forma dinámica para evitar dependencias circulares
+            const { getCurrentUser } = await import('../api/client');
+            await getCurrentUser();
+          } catch (err: any) {
+            // Si el backend responde 404 o devuelve USER_NOT_FOUND, cerramos la sesión local
+            const message = err?.response?.data || err?.message || String(err);
+            console.warn('⚠️ Verificación backend fallo:', message);
+            // Condiciones típicas: 404 con { error: 'USER_NOT_FOUND' }
+            const isUserNotFound = err?.response?.status === 404 || (err?.response?.data?.error === 'USER_NOT_FOUND');
+            if (isUserNotFound) {
+              console.log('🚪 Usuario no encontrado en backend — cerrando sesión local');
+              try {
+                await signOut(auth);
+              } catch (e) {
+                console.warn('❌ Error al cerrar sesión local:', e);
+              }
+              setUser(null);
+              setToken(null);
+              setAuthToken(undefined);
+            }
+          }
         } catch (error) {
           console.error('❌ Error obteniendo token:', error);
         }

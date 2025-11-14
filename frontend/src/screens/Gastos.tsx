@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
-import { useGastos } from '../hooks/useGastos';
+import { useGastos } from '../viewmodels/useGastos';
 
 export default function Gastos() {
   const { data, loading, error } = useGastos();

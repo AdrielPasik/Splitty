@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
-import { useAmigos } from '../hooks/useAmigos';
+import { useAmigos } from '../viewmodels/useAmigos';
 
 export default function Amigos() {
   const { data, loading, error } = useAmigos();

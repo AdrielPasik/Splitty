@@ -1,11 +1,7 @@
 import { initializeApp } from 'firebase/app';
-import {
-  getAuth,
-  initializeAuth,
-  getReactNativePersistence
-} from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
-import { getFirestore, experimentalForceLongPolling } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
@@ -20,17 +16,21 @@ const firebaseConfig = {
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 
-// Configurar Auth con persistencia en AsyncStorage
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
-});
+// Configurar Auth
+// Nota: en este proyecto evitamos importar 'firebase/auth/react-native'
+// directamente (no está presente en todas las instalaciones). Usamos
+// `getAuth(app)` que funciona en la mayoría de entornos React Native.
+// Si necesitás persistencia con AsyncStorage, podemos reintroducirla
+// cuando la dependencia esté presente o migrar a `@react-native-firebase`.
+const auth = getAuth(app);
 
-// Configurar Firestore con long-polling para React Native
+// Configurar Firestore
 const db = getFirestore(app);
-// Configuración optimizada para React Native
-if (experimentalForceLongPolling) {
-  // Esta configuración ayuda a evitar advertencias de WebChannel en React Native
-}
+// Nota: en versiones recientes del SDK modular la opción
+// `experimentalForceLongPolling` ya no se exporta directamente.
+// Si se necesita forzar long-polling en React Native, puede aplicarse
+// mediante un cast a `any` o usando `initializeFirestore` con settings.
+// Por ahora dejamos la configuración por defecto.
 
 // Configurar Storage
 const storage = getStorage(app);

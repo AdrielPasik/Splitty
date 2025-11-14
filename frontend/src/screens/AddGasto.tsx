@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import * as groupsApi from '../api/groups';
+import { useAddGasto } from '../viewmodels/useAddGasto';
 
 export default function AddGasto({ route, navigation }: any) {
   const { grupoId, nombre } = route.params || {};
-  const [loading, setLoading] = useState(false);
-  const [members, setMembers] = useState<any[]>([]);
+  const { members, loading, refreshMembers } = useAddGasto(grupoId);
   const [amount, setAmount] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [payerId, setPayerId] = useState<string | null>(null);
@@ -13,28 +12,15 @@ export default function AddGasto({ route, navigation }: any) {
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
-    fetchMembers();
   }, [grupoId]);
 
-  const fetchMembers = async () => {
-    setLoading(true);
-    try {
-      const res = await groupsApi.getGroupMembers(grupoId);
-      const arr = Array.isArray(res) ? res : res?.members ?? [];
-      setMembers(arr);
-      // default: all members selected, payer = first
-      const map: Record<string, boolean> = {};
-      arr.forEach((m: any) => { map[m.id] = true; });
-      setSelectedIds(map);
-      if (arr.length > 0) setPayerId(arr[0].id);
-    } catch (e) {
-      console.error('getGroupMembers', e);
-      setMembers([]);
-      setSelectedIds({});
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    // when members change (from viewmodel), initialize selection defaults
+    const map: Record<string, boolean> = {};
+    members.forEach((m: any) => { map[m.id] = true; });
+    setSelectedIds(map);
+    if (members.length > 0) setPayerId(members[0].id);
+  }, [members]);
 
   const participantList = useMemo(() => members.filter(m => selectedIds[m.id]), [members, selectedIds]);
   const participantsCount = participantList.length;

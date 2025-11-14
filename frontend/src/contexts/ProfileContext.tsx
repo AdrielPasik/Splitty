@@ -5,7 +5,7 @@ import { updateProfile, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../config/firebase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { storage, db } from "../config/firebase";
-import * as FileSystem from "expo-file-system/legacy";
+import * as FileSystem from "expo-file-system";
 
 interface ProfileContextType {
   profileImage: string;

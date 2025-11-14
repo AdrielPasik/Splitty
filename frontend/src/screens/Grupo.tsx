@@ -1,31 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, FlatList, Modal, Alert, TouchableOpacity as RNTouchableOpacity, TouchableWithoutFeedback } from 'react-native';
-import * as groupsApi from '../api/groups';
+import { useGrupo } from '../viewmodels/useGrupo';
 
 export default function Grupo({ route, navigation }: any) {
   const { grupoId, nombre, emoji } = route.params || {};
-  const [members, setMembers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
   const [optionsVisible, setOptionsVisible] = useState(false);
-
-  const fetchMembers = async () => {
-    setLoading(true);
-    try {
-      const res = await groupsApi.getGroupMembers(grupoId);
-      // backend might return an object or array; normalize
-      const arr = Array.isArray(res) ? res : res?.members ?? [];
-      setMembers(arr);
-    } catch (e) {
-      console.error('getGroupMembers error', e);
-      setMembers([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { members, loading, refreshMembers } = useGrupo(grupoId);
 
   useEffect(() => {
     navigation.setOptions({ headerShown: false });
-    fetchMembers();
     const unsubBlur = navigation.addListener('blur', () => setOptionsVisible(false));
     return () => unsubBlur();
   }, [grupoId]);

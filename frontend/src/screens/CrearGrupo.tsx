@@ -2,82 +2,48 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView, Share } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import QRCode from 'react-native-qrcode-svg';
-import * as groupsApi from '../api/groups';
-import { getCurrentUser } from '../api/client';
-import { saveGroupEmoji } from '../utils/groupEmoji';
-import { useAuth } from '../contexts/AuthContext';
+import { useCrearGrupo } from '../viewmodels/useCrearGrupo';
 
 export default function CrearGrupo({ navigation }: any) {
-  const { user } = useAuth();
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [emoji, setEmoji] = useState('✈️');
   const [inviteMode, setInviteMode] = useState<'link' | 'qr'>('link');
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [createdGroupId, setCreatedGroupId] = useState<string | null>(null);
+  const { loading, createGroup, createInviteLink } = useCrearGrupo();
 
   const handleCreate = async () => {
     if (!nombre.trim()) {
       Alert.alert('Nombre requerido', 'Ingresá un nombre para el grupo');
       return;
     }
-    setLoading(true);
     try {
-      // create group
-      // Backend expects initialMembers to have at least 1 item — fetch backend user id (UUID) from /users/me
-      let initialMembers: string[] = [];
-      try {
-        const me = await getCurrentUser();
-        const backendId = me?.id || me?.userId || me?.uid;
-        if (backendId) {
-          initialMembers = [backendId];
-        } else {
-          console.warn('No backend user id found in /users/me response, falling back to firebase uid');
-          if (user?.uid) initialMembers = [user.uid];
-        }
-      } catch (meErr) {
-        console.warn('Could not fetch /users/me', meErr);
-        if (user?.uid) initialMembers = [user.uid];
-      }
-
-      const res = await groupsApi.createGroup({ nombre: nombre.trim(), descripcion: descripcion.trim(), initialMembers, emoji } as any);
-      const grupoId = res?.id || res?._id || res?.grupoId || null;
+      const grupoId = await createGroup({ nombre, descripcion, emoji });
       setCreatedGroupId(grupoId);
-      // persist emoji locally so the front can show it even if backend doesn't save it
-      if (grupoId && emoji) {
-        await saveGroupEmoji(grupoId, emoji);
-      }
       Alert.alert('Grupo creado', 'Tu grupo se creó correctamente');
-
-      // generar link de invitación si el backend lo permite
       try {
         if (grupoId) {
-          const invite = await groupsApi.createInviteLink(grupoId, 60 * 24 * 30); // 30 days
+          const invite = await createInviteLink(grupoId, 60 * 24 * 30);
           const url = invite?.url || (invite?.token ? (invite.url || `https://app.example.com/join/${invite.token}`) : null);
           setInviteUrl(url || null);
           if (url) {
-            // copiar automáticamente al portapapeles
             try {
               await Clipboard.setStringAsync(url);
             } catch (cErr) {
               console.warn('clipboard error', cErr);
             }
-            // mostrar alerta y volver a Inicio al confirmar
             Alert.alert('Grupo creado', 'Link de invitación copiado al portapapeles. Podés compartirlo con tus amigos.', [{ text: 'OK', onPress: () => navigation.goBack() }]);
-            return; // ya navegamos atrás
+            return;
           }
         }
       } catch (linkErr) {
         console.warn('No se pudo generar link de invitación', linkErr);
       }
-      // si no hubo link, volvemos a Inicio igualmente
       navigation.goBack();
     } catch (e: any) {
       console.error('createGroup error', e);
       Alert.alert('Error', e?.response?.data?.error || e?.message || 'Error al crear grupo');
-    } finally {
-      setLoading(false);
     }
   };
 

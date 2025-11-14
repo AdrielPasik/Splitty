@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView } from 'react-native';
-import * as groupsApi from '../api/groups';
+import { useUnirseGrupo } from '../viewmodels/useUnirseGrupo';
 
 export default function UnirseGrupo({ navigation }: any) {
   const [token, setToken] = useState('');
   const [grupoId, setGrupoId] = useState('');
   const [loading, setLoading] = useState(false);
+  const { joinByInvite, joinGroup } = useUnirseGrupo();
 
   const handleJoinByToken = async () => {
     if (!token.trim()) {
@@ -19,7 +20,7 @@ export default function UnirseGrupo({ navigation }: any) {
     }
     setLoading(true);
     try {
-  const res = await groupsApi.joinByInvite(token.trim());
+      await joinByInvite(token.trim());
       // regresar a Inicio; Inicio refrescará la lista en focus
       Alert.alert('Solicitud enviada', 'Te uniste al grupo correctamente', [{ text: 'OK', onPress: () => navigation.goBack() }]);
     } catch (e: any) {
@@ -58,7 +59,7 @@ export default function UnirseGrupo({ navigation }: any) {
 
     setLoading(true);
     try {
-      const res = await groupsApi.joinGroup(grupoId.trim());
+      await joinGroup(grupoId.trim());
       // regresar a Inicio; Inicio refrescará la lista en focus
       Alert.alert('Solicitud enviada', 'Se envió tu solicitud para unirte al grupo', [{ text: 'OK', onPress: () => navigation.goBack() }]);
     } catch (e: any) {
