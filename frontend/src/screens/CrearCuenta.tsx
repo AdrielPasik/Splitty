@@ -16,7 +16,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
-import { checkClaveAvailable, uploadImageToCloudinaryUnsigned } from '../api/client';
+import { checkClaveAvailable } from '../api/client';
 import Constants from 'expo-constants';
 
 export default function CrearCuenta({ navigation }: any) {

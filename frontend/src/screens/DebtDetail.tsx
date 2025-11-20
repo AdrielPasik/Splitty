@@ -6,7 +6,6 @@ import * as Clipboard from 'expo-clipboard';
 import { Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import Constants from 'expo-constants';
 import { uploadReceipt } from '../api/balances';
 import { useTheme } from '../contexts/ThemeContext';
 import { createSettlement } from '../api/settlements';
@@ -212,17 +211,8 @@ export default function DebtDetail({ route, navigation }: any) {
         return;
       }
 
-      const rawCloudName = Constants.expoConfig?.extra?.CLOUDINARY_CLOUD_NAME;
-      const rawUploadPreset = Constants.expoConfig?.extra?.CLOUDINARY_UPLOAD_PRESET;
-      const cloudName = typeof rawCloudName === 'string' ? rawCloudName : undefined;
-      const uploadPreset = typeof rawUploadPreset === 'string' ? rawUploadPreset : undefined;
-      if (!cloudName || !uploadPreset) {
-        console.warn('Cloudinary config missing or invalid. CLOUDINARY_CLOUD_NAME and CLOUDINARY_UPLOAD_PRESET must be strings. Falling back to server-side upload.');
-      }
-      const wantBase64 = !(cloudName && uploadPreset);
-
       const result = await ImagePicker.launchImageLibraryAsync({
-        base64: wantBase64,
+        base64: true,
         quality: 0.7,
       });
 
