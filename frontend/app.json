@@ -10,8 +10,8 @@
     "scheme": "splitty",
     "splash": {
       "image": "./assets/splittyLogo.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
+      "resizeMode": "contain",
+      "backgroundColor": "#E6F4F1"
     },
     "ios": {
       "supportsTablet": true,
@@ -20,10 +20,8 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/splittyLogo.png",
-        "backgroundColor": "#ffffff",
-        "monochromeImage": "./assets/splittyLogo.png"
+        "backgroundColor": "#E6F4F1"
       },
-      "edgeToEdgeEnabled": true,
       "package": "com.splitty.app",
       "permissions": [
         "CAMERA"
@@ -40,7 +38,12 @@
           ],
           "category": ["BROWSABLE", "DEFAULT"]
         }
-      ]
+      ],
+      "splash": {
+        "backgroundColor": "#E6F4F1",
+        "resizeMode": "contain",
+        "image": "./assets/splittyLogo.png"
+      }
     },
     "web": {
       "favicon": "./assets/splittyLogo.png"
