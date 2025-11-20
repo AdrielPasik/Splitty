@@ -311,7 +311,7 @@ export default function DebtDetail({ route, navigation }: any) {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Acciones rápidas</Text>
 
-          <TouchableOpacity style={styles.buttonSecondary} onPress={copyAndOpenMP}>
+        <TouchableOpacity style={styles.buttonSecondary} onPress={copyAndOpenMP}>
             <Feather name="dollar-sign" size={18} color={colors.primaryText} />
             <Text style={styles.buttonText}>Copiar alias y abrir Mercado Pago</Text>
           </TouchableOpacity>
@@ -321,20 +321,33 @@ export default function DebtDetail({ route, navigation }: any) {
         <View style={styles.receiptSection}>
           <Text style={styles.sectionTitle}>Comprobante de pago</Text>
 
-          {uploadedUrl ? (
-            <View style={styles.uploadedContainer}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                <Feather name="check-circle" size={16} color={colors.success} style={{ marginRight: 6 }} />
-                <Text style={{ color: colors.success, fontWeight: '600' }}>
-                  Comprobante subido
+          {/* PLACEHOLDER → siempre arriba */}
+          <TouchableOpacity
+            style={[styles.uploadPlaceholder, { marginBottom: 20 }]}
+            onPress={pickAndUpload}
+            disabled={uploading}
+          >
+            {uploading ? (
+              <>
+                <ActivityIndicator color={colors.primary} size="large" />
+                <Text style={styles.uploadPlaceholderText}>Subiendo...</Text>
+              </>
+            ) : (
+              <>
+                <Feather name="upload-cloud" size={48} color={colors.textMuted} />
+                <Text style={styles.uploadPlaceholderText}>
+                  Toca para seleccionar un comprobante{'\n'}de tu galería
                 </Text>
-              </View>
-              <Image source={{ uri: uploadedUrl }} style={styles.receiptImage} resizeMode="contain" />
-            </View>
-          ) : localUri ? (
+              </>
+            )}
+          </TouchableOpacity>
+
+          {/* PREVISUALIZACIÓN */}
+          {localUri && (
             <View style={styles.previewContainer}>
               <Text style={styles.previewLabel}>Previsualización</Text>
               <Image source={{ uri: localUri }} style={styles.receiptImage} resizeMode="contain" />
+
               {uploading ? (
                 <ActivityIndicator color={colors.primary} size="large" />
               ) : (
@@ -344,26 +357,25 @@ export default function DebtDetail({ route, navigation }: any) {
                 </TouchableOpacity>
               )}
             </View>
-          ) : (
-            <TouchableOpacity
-              style={styles.uploadPlaceholder}
-              onPress={pickAndUpload}
-              disabled={uploading}
-            >
-              {uploading ? (
-                <>
-                  <ActivityIndicator color={colors.primary} size="large" />
-                  <Text style={styles.uploadPlaceholderText}>Subiendo...</Text>
-                </>
-              ) : (
-                <>
-                  <Feather name="upload-cloud" size={48} color={colors.textMuted} />
-                  <Text style={styles.uploadPlaceholderText}>
-                    Toca para seleccionar un comprobante{'\n'}de tu galería
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
+          )}
+
+          {/* COMPROBANTE SUBIDO */}
+          {uploadedUrl && (
+            <View style={styles.uploadedContainer}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                <Feather
+                  name="check-circle"
+                  size={16}
+                  color={colors.success}
+                  style={{ marginRight: 6 }}
+                />
+                <Text style={{ color: colors.success, fontWeight: '600' }}>
+                  Comprobante subido
+                </Text>
+              </View>
+
+              <Image source={{ uri: uploadedUrl }} style={styles.receiptImage} resizeMode="contain" />
+            </View>
           )}
         </View>
       </ScrollView>
