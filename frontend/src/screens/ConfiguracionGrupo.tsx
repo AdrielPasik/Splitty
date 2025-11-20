@@ -215,9 +215,16 @@ export default function ConfiguracionGrupo({ route, navigation }: any) {
             if (texto === nombre) {
               try {
                 await deleteGroup();
-                navigation.navigate('Inicio');
+
+                // Navegar a la pantalla principal de grupos y limpiar el stack
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Main' }],
+                });
+
+                // Mostrar mensaje de confirmación después de la navegación
                 setTimeout(() => {
-                  Alert.alert('Grupo eliminado', 'El grupo fue eliminado permanentemente');
+                  Alert.alert('✅ Grupo eliminado', 'El grupo fue eliminado permanentemente');
                 }, 500);
               } catch (error: any) {
                 Alert.alert('Error', error?.response?.data?.error || 'No se pudo eliminar el grupo');

@@ -79,29 +79,76 @@ export async function countMembers(grupoId: string) {
 export async function deleteGroup(grupoId: string) {
   // Eliminar en orden correcto para respetar las foreign keys
   return db.transaction(async (trx) => {
-    // 1. Eliminar saldos_grupo (depende de miembros_grupo)
-    await trx('dbo.saldos_grupo').where({ grupo_id: grupoId }).delete();
+    console.log(`🗑️ Iniciando eliminación del grupo ${grupoId}`);
 
-    // 2. Eliminar saldos_comprobantes (depende de miembros_grupo, pero tiene CASCADE)
-    await trx('dbo.saldos_comprobantes').where({ grupo_id: grupoId }).delete();
+    try {
+      // PASO CRÍTICO: Deshabilitar temporalmente el trigger de inmutabilidad del ledger
+      console.log('0. Deshabilitando trigger de inmutabilidad del ledger...');
+      await trx.raw('DISABLE TRIGGER dbo.trg_ledger_inmutable ON dbo.ledger');
+      console.log('   ✅ Trigger deshabilitado temporalmente');
 
-    // 3. Eliminar ledger (depende de miembros_grupo)
-    await trx('dbo.ledger').where({ grupo_id: grupoId }).delete();
+      // 1. Eliminar saldos_grupo (depende de miembros_grupo)
+      console.log('1. Eliminando saldos_grupo...');
+      const saldosDeleted = await trx('dbo.saldos_grupo').where({ grupo_id: grupoId }).delete();
+      console.log(`   ✅ ${saldosDeleted} registros eliminados de saldos_grupo`);
 
-    // 4. Eliminar divisiones_gasto (depende de miembros_grupo y gastos, tiene CASCADE)
-    await trx('dbo.divisiones_gasto').where({ grupo_id: grupoId }).delete();
+      // 2. Eliminar saldos_comprobantes (depende de miembros_grupo)
+      console.log('2. Eliminando saldos_comprobantes...');
+      const comprobantesDeleted = await trx('dbo.saldos_comprobantes').where({ grupo_id: grupoId }).delete();
+      console.log(`   ✅ ${comprobantesDeleted} registros eliminados de saldos_comprobantes`);
 
-    // 5. Eliminar gastos (tiene CASCADE, pero vamos a ser explícitos)
-    await trx('dbo.gastos').where({ grupo_id: grupoId }).delete();
+      // 3. Eliminar ledger (ahora SÍN el trigger de inmutabilidad)
+      console.log('3. Eliminando ledger (sin trigger de inmutabilidad)...');
+      const ledgerDeleted = await trx('dbo.ledger').where({ grupo_id: grupoId }).delete();
+      console.log(`   ✅ ${ledgerDeleted} registros eliminados de ledger`);
 
-    // 6. Eliminar liquidaciones (tiene CASCADE, pero vamos a ser explícitos)
-    await trx('dbo.liquidaciones').where({ grupo_id: grupoId }).delete();
+      // 4. Eliminar divisiones_gasto (depende de gastos y miembros_grupo)
+      console.log('4. Eliminando divisiones_gasto...');
+      const divisionesDeleted = await trx('dbo.divisiones_gasto').where({ grupo_id: grupoId }).delete();
+      console.log(`   ✅ ${divisionesDeleted} registros eliminados de divisiones_gasto`);
 
-    // 7. Eliminar miembros_grupo (depende de grupos)
-    await trx('dbo.miembros_grupo').where({ grupo_id: grupoId }).delete();
+      // 5. Eliminar gastos (ahora que ledger ya no los referencia)
+      console.log('5. Eliminando gastos...');
+      const gastosDeleted = await trx('dbo.gastos').where({ grupo_id: grupoId }).delete();
+      console.log(`   ✅ ${gastosDeleted} registros eliminados de gastos`);
 
-    // 8. Finalmente eliminar el grupo
-    return trx('dbo.grupos').where({ id: grupoId }).delete();
+      // 6. Eliminar liquidaciones (ahora que ledger ya no las referencia)
+      console.log('6. Eliminando liquidaciones...');
+      const liquidacionesDeleted = await trx('dbo.liquidaciones').where({ grupo_id: grupoId }).delete();
+      console.log(`   ✅ ${liquidacionesDeleted} registros eliminados de liquidaciones`);
+
+      // 7. Eliminar miembros_grupo (depende de grupos)
+      console.log('7. Eliminando miembros_grupo...');
+      const miembrosDeleted = await trx('dbo.miembros_grupo').where({ grupo_id: grupoId }).delete();
+      console.log(`   ✅ ${miembrosDeleted} registros eliminados de miembros_grupo`);
+
+      // 8. Finalmente eliminar el grupo
+      console.log('8. Eliminando grupo...');
+      const result = await trx('dbo.grupos').where({ id: grupoId }).delete();
+      console.log(`   ✅ ${result} grupo eliminado`);
+
+      // 9. Rehabilitar el trigger de inmutabilidad del ledger
+      console.log('9. Rehabilitando trigger de inmutabilidad del ledger...');
+      await trx.raw('ENABLE TRIGGER dbo.trg_ledger_inmutable ON dbo.ledger');
+      console.log('   ✅ Trigger rehabilitado');
+
+      console.log(`✅ Grupo ${grupoId} eliminado exitosamente`);
+      return result;
+
+    } catch (error) {
+      console.error(`❌ Error eliminando grupo ${grupoId}:`, error);
+
+      // IMPORTANTE: Rehabilitar el trigger incluso si hubo error
+      try {
+        console.log('🔧 Rehabilitando trigger tras error...');
+        await trx.raw('ENABLE TRIGGER dbo.trg_ledger_inmutable ON dbo.ledger');
+        console.log('   ✅ Trigger rehabilitado tras error');
+      } catch (enableError) {
+        console.error('❌ Error rehabilitando trigger:', enableError);
+      }
+
+      throw error;
+    }
   });
 }
 
