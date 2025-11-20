@@ -13,7 +13,7 @@ export default ({ config }) => ({
     // inesperados queden expuestos a la app (causa frecuente de errores).
     BACKEND_URL: process.env.EXPO_PUBLIC_BACKEND_URL ? String(process.env.EXPO_PUBLIC_BACKEND_URL) : (process.env.BACKEND_URL ? String(process.env.BACKEND_URL) : null),
     eas: {
-      projectId: "d4288f8f-e584-4de7-87eb-facedcec213e"
+      projectId: "034f045b-5e8c-45a9-8de2-08bebcc7d803"
     }
   }
 });

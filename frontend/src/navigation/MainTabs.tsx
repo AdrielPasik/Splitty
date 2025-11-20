@@ -52,24 +52,23 @@ const Tab = createBottomTabNavigator();
 
 export default function MainTabs() {
     const { colors, theme } = useTheme();
-    // 2. Obtener los insets del área segura
     const insets = useSafeAreaInsets();
     
-    // Forzar actualización de estilos cuando cambia el tema o los insets
-    const tabBarStyle = useMemo(() => [
-        styles.tabBar, 
-        { 
-            backgroundColor: colors.modalBackground, 
-            borderTopColor: colors.borderLight,
-            shadowColor: theme === 'dark' ? '#000' : '#000',
-            shadowOpacity: theme === 'dark' ? 0.3 : 0.1,
-            // 3. Aplicar el padding dinámico
-            paddingBottom: styles.tabBar.paddingBase + insets.bottom,
-            // 4. Establecer altura dinámica (si el 'height' estático se elimina)
-            height: styles.tabBar.minHeight + insets.bottom
-        }
-    ], [colors.modalBackground, colors.borderLight, theme, insets.bottom]);
-    
+    // Calcular el padding bottom dinámicamente
+    const tabBarStyle = useMemo(() => ({
+        backgroundColor: colors.modalBackground,
+        borderTopColor: colors.borderLight,
+        borderTopWidth: 1,
+        paddingTop: 10,
+        paddingBottom: Math.max(insets.bottom, 10), // Al menos 10px de padding
+        height: 60 + Math.max(insets.bottom, 10), // Altura base + padding bottom
+        elevation: 8,
+        shadowColor: theme === 'dark' ? '#000' : '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: theme === 'dark' ? 0.3 : 0.1,
+        shadowRadius: 4,
+    }), [colors.modalBackground, colors.borderLight, theme, insets.bottom]);
+
     return (
         <Tab.Navigator
             key={theme}
@@ -132,20 +131,6 @@ export default function MainTabs() {
 }
 
 const styles = StyleSheet.create({
-    tabBar: {
-        // Se define una altura mínima y un padding base para el cálculo dinámico.
-        // Se remueven los valores fijos de height y paddingBottom para dar paso al cálculo dinámico.
-        minHeight: 60, // Altura base mínima para el contenido (iconos + labels)
-        paddingBase: 10, // Base padding que quieres debajo de los iconos (antes era 20)
-        paddingTop: 10,
-        
-        borderTopWidth: 1,
-        elevation: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-    },
     tabBarLabel: {
         fontSize: 11,
         fontWeight: '600',

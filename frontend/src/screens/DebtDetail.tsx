@@ -178,28 +178,56 @@ export default function DebtDetail({ route, navigation }: any) {
     try {
       const clave = String(debt?.haciaUsuarioClave || '');
       if (!clave) return Alert.alert('Alias no disponible', 'No se encontró el alias del acreedor');
-      await Clipboard.setStringAsync(clave);
-      Alert.alert('Alias copiado', 'Se copió el alias al portapapeles. Abriendo Mercado Pago...');
 
-      const mpSchemes = ['mercadopago://', 'mercadopago://home', 'mercadopago://open'];
+      // Copiar alias al portapapeles
+      await Clipboard.setStringAsync(clave);
+
+      // Intentar abrir Mercado Pago
+      const mpSchemes = [
+        'mercadopago://',
+        'mercadopago://home',
+        'mercadopago://open',
+      ];
+
       let opened = false;
       for (const scheme of mpSchemes) {
         try {
-          const can = await Linking.canOpenURL(scheme);
-          if (can) {
+          const canOpen = await Linking.canOpenURL(scheme);
+          if (canOpen) {
             await Linking.openURL(scheme);
             opened = true;
+            Alert.alert('Alias copiado', `Se copió "${clave}" al portapapeles.`);
             break;
           }
-        } catch (e) {
-          // ignore
+        } catch (err) {
+          console.log(`No se pudo abrir ${scheme}:`, err);
+          // Continuar con el siguiente esquema
         }
       }
+
+      // Si no se pudo abrir la app, abrir la web
       if (!opened) {
-        await Linking.openURL('https://www.mercadopago.com.ar');
+        Alert.alert(
+          'Alias copiado',
+          `Se copió "${clave}" al portapapeles.\n\nNo se detectó la app de Mercado Pago. ¿Deseas abrir el sitio web?`,
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+              text: 'Abrir web',
+              onPress: async () => {
+                try {
+                  await Linking.openURL('https://www.mercadopago.com.ar');
+                } catch (e) {
+                  Alert.alert('Error', 'No se pudo abrir el navegador');
+                }
+              },
+            },
+          ]
+        );
       }
     } catch (e) {
-      Alert.alert('Error', 'No se pudo copiar el alias o abrir Mercado Pago.');
+      console.error('Error en copyAndOpenMP:', e);
+      Alert.alert('Error', 'No se pudo copiar el alias.');
     }
   };
 

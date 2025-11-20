@@ -11,6 +11,8 @@ import {
   ActivityIndicator,
   Switch,
   Share,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { useConfiguracionGrupo } from '../viewmodels/useConfiguracionGrupo';
@@ -38,11 +40,13 @@ export default function ConfiguracionGrupo({ route, navigation }: any) {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showEmojiModal, setShowEmojiModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
 
   // Estados de edición
   const [editNombre, setEditNombre] = useState(nombre || '');
   const [editDescripcion, setEditDescripcion] = useState(descripcion || '');
   const [selectedEmoji, setSelectedEmoji] = useState(emoji || '✈️');
+  const [confirmDeleteText, setConfirmDeleteText] = useState('');
 
   // Configuraciones
   const [notificaciones, setNotificaciones] = useState(true);
@@ -184,59 +188,39 @@ export default function ConfiguracionGrupo({ route, navigation }: any) {
           text: 'Sí, eliminar',
           style: 'destructive',
           onPress: () => {
-            // Segunda confirmación
-            Alert.alert(
-              '⚠️ Confirmación final',
-              `Escribe "${nombre}" para confirmar la eliminación`,
-              [
-                { text: 'Cancelar', style: 'cancel' },
-                {
-                  text: 'Continuar',
-                  onPress: () => confirmarEliminacionConTexto(),
-                },
-              ]
-            );
+            // Mostrar modal de confirmación con texto
+            setConfirmDeleteText('');
+            setShowDeleteConfirmModal(true);
           },
         },
       ]
     );
   };
 
-  const confirmarEliminacionConTexto = () => {
-    Alert.prompt(
-      'Confirmación',
-      `Escribe "${nombre}" para confirmar`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async (texto) => {
-            if (texto === nombre) {
-              try {
-                await deleteGroup();
+  const confirmarEliminacionFinal = async () => {
+    if (confirmDeleteText !== nombre) {
+      Alert.alert('Error', 'El nombre no coincide');
+      return;
+    }
 
-                // Navegar a la pantalla principal de grupos y limpiar el stack
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'Main' }],
-                });
+    setShowDeleteConfirmModal(false);
 
-                // Mostrar mensaje de confirmación después de la navegación
-                setTimeout(() => {
-                  Alert.alert('✅ Grupo eliminado', 'El grupo fue eliminado permanentemente');
-                }, 500);
-              } catch (error: any) {
-                Alert.alert('Error', error?.response?.data?.error || 'No se pudo eliminar el grupo');
-              }
-            } else {
-              Alert.alert('Error', 'El nombre no coincide');
-            }
-          },
-        },
-      ],
-      'plain-text'
-    );
+    try {
+      await deleteGroup();
+
+      // Navegar a la pantalla principal de grupos y limpiar el stack
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Main' }],
+      });
+
+      // Mostrar mensaje de confirmación después de la navegación
+      setTimeout(() => {
+        Alert.alert('✅ Grupo eliminado', 'El grupo fue eliminado permanentemente');
+      }, 500);
+    } catch (error: any) {
+      Alert.alert('Error', error?.response?.data?.error || 'No se pudo eliminar el grupo');
+    }
   };
 
   const handleCompartirGrupo = async () => {
@@ -587,6 +571,88 @@ export default function ConfiguracionGrupo({ route, navigation }: any) {
             </ScrollView>
           </View>
         </View>
+      </Modal>
+
+      {/* Modal: Confirmación de eliminación con texto */}
+      <Modal
+        visible={showDeleteConfirmModal}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowDeleteConfirmModal(false)}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>⚠️ Confirmación final</Text>
+                  <TouchableOpacity onPress={() => {
+                    setConfirmDeleteText('');
+                    setShowDeleteConfirmModal(false);
+                  }}>
+                    <Feather name="x" size={24} color={colors.iconColor} />
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={[styles.label, { color: '#B00020', marginBottom: 12 }]}>
+                  Esta acción es IRREVERSIBLE
+                </Text>
+
+                <Text style={[styles.cardSubtitle, { marginBottom: 16 }]}>
+                  Escribe exactamente "{nombre}" para confirmar la eliminación permanente del grupo.
+                </Text>
+
+                <Text style={styles.label}>Nombre del grupo</Text>
+                <TextInput
+                  style={styles.input}
+                  value={confirmDeleteText}
+                  onChangeText={setConfirmDeleteText}
+                  placeholder={`Escribe "${nombre}"`}
+                  placeholderTextColor={colors.textMuted}
+                  autoFocus
+                  editable={true}
+                  selectTextOnFocus={true}
+                  underlineColorAndroid="transparent"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.modalButtonCancel]}
+                    onPress={() => {
+                      setConfirmDeleteText('');
+                      setShowDeleteConfirmModal(false);
+                    }}
+                  >
+                    <Text style={styles.modalButtonTextCancel}>Cancelar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.modalButton,
+                      {
+                        backgroundColor: confirmDeleteText === nombre ? '#8B0000' : colors.borderLight,
+                      },
+                    ]}
+                    onPress={confirmarEliminacionFinal}
+                    disabled={confirmDeleteText !== nombre}
+                  >
+                    <Text
+                      style={[
+                        styles.modalButtonTextSave,
+                        {
+                          color: confirmDeleteText === nombre ? '#FFF' : colors.textMuted,
+                        },
+                      ]}
+                    >
+                      Eliminar grupo
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );
