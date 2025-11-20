@@ -382,24 +382,24 @@ export default function Grupo({ route, navigation }: any) {
                         </View>
                       ) : (
                         debts.map((d: any, idx: number) => (
-                          <TouchableOpacity
-                            key={idx}
-                            style={styles.debtCard}
-                            onPress={() => navigation.navigate('DebtDetail', { debt: d, grupoId, deudorId: currentMember?.id })}
-                          >
+                          <View key={idx} style={styles.debtCard}>
                             <View style={[styles.debtIcon, { backgroundColor: colors.error }]}>
                               <Feather name="arrow-up-right" size={20} color={colors.primaryText} />
                             </View>
                             <View style={styles.debtInfo}>
                               <Text style={styles.debtName}>{d.haciaUsuarioNombre || d.haciaUsuarioCorreo}</Text>
                               <Text style={styles.debtLabel}>{d.gastoDescripcion || 'Pago pendiente'}</Text>
-                            </View>
-                            <View style={styles.debtAmountContainer}>
                               <Text style={[styles.debtAmount, { color: colors.error }]}>
                                 ${Number(d.importe).toFixed(2)}
                               </Text>
                             </View>
-                          </TouchableOpacity>
+                            <TouchableOpacity 
+                              style={styles.payButton}
+                              onPress={() => navigation.navigate('DebtDetail', { debt: d, grupoId, deudorId: currentMember?.id })}
+                            >
+                              <Text style={styles.payButtonText}>Pagar</Text>
+                            </TouchableOpacity>
+                          </View>
                         ))
                       )}
                     </View>
@@ -874,12 +874,27 @@ const getStyles = (colors: any, insets: any) => StyleSheet.create({
   debtLabel: {
     fontSize: 12,
     color: colors.textSecondary,
+    marginBottom: 4,
   },
   debtAmountContainer: {
     alignItems: 'flex-end'
   },
   debtAmount: {
-    fontSize: 18,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  payButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 80,
+  },
+  payButtonText: {
+    color: colors.primaryText,
+    fontSize: 15,
     fontWeight: '700',
   },
   fab: {
