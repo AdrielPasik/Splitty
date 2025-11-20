@@ -13,18 +13,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#E6F4F1"
     },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.splitty.app"
-    },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/splittyLogo.png",
-        "backgroundColor": "#E6F4F1"
-      },
+      "icon": "./assets/splittyLogo.png",
       "package": "com.splitty.app",
+      "versionCode": 1,
       "permissions": [
-        "CAMERA"
+        "CAMERA",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
       ],
       "intentFilters": [
         {
@@ -36,7 +32,10 @@
               "host": "join"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "splash": {
@@ -54,7 +53,27 @@
         {
           "cameraPermission": "Necesitamos acceso a la cámara para escanear códigos QR"
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 24,
+            "targetSdkVersion": 34,
+            "compileSdkVersion": 34,
+            "proguardMinify": true,
+            "enableProguardInReleaseBuilds": true,
+            "enableMinifyInReleaseBuilds": true
+          }
+        }
       ]
-    ]
-  }
+    ],
+    "extra": {
+      "BACKEND_URL": "https://splitty-azieva.fly.dev/",
+      "eas": {
+        "projectId": "f40eab8a-fedd-44de-b378-996b1639a9a7"
+      }
+    }
+  },
+  "projectId": "f40eab8a-fedd-44de-b378-996b1639a9a7"
 }

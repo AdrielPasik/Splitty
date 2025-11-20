@@ -12,5 +12,8 @@ export default ({ config }) => ({
     // Forzar la conversión a `string` para evitar que objetos o valores
     // inesperados queden expuestos a la app (causa frecuente de errores).
     BACKEND_URL: process.env.EXPO_PUBLIC_BACKEND_URL ? String(process.env.EXPO_PUBLIC_BACKEND_URL) : (process.env.BACKEND_URL ? String(process.env.BACKEND_URL) : null),
-  },
+    eas: {
+      projectId: "f40eab8a-fedd-44de-b378-996b1639a9a7"
+    }
+  }
 });
