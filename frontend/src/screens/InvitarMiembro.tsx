@@ -82,7 +82,7 @@ export default function InvitarMiembro({ route, navigation }: any) {
       const added = res?.added ?? (res?.ok ? 1 : 0);
       if (added > 0) {
         Alert.alert('✓ Hecho', 'Miembro añadido al grupo');
-        setTimeout(() => navigation.goBack(), 1000);
+        // La lista se actualizará automáticamente gracias al hook
       } else {
         Alert.alert('Info', 'El usuario ya es miembro del grupo o no se pudo agregar.');
       }

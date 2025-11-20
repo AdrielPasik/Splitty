@@ -123,8 +123,6 @@ export default function InicioSesion({ navigation }: any) {
               <Text style={styles.createAccountText}>Crear cuenta</Text>
             </TouchableOpacity>
           </View>
-
-          <Text style={styles.bottomText}>Inicia sesión en tu cuenta</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -144,7 +142,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 40,
     paddingBottom: 40,
-    justifyContent: 'flex-start'
+    justifyContent: 'center'
   },
   iconContainer: {
     alignItems: 'center',
@@ -203,7 +201,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF'
   },
   forgotPasswordButton: {
-    alignSelf: 'flex-end',
+    alignSelf: 'center',
     marginBottom: 24
   },
   forgotPasswordText: {
@@ -234,11 +232,5 @@ const styles = StyleSheet.create({
   createAccountText: {
     fontSize: 12,
     color: '#033E30'
-  },
-  bottomText: {
-    fontSize: 12,
-    color: '#555555',
-    textAlign: 'center',
-    marginTop: 24
   }
 });

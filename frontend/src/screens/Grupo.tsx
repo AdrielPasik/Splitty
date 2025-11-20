@@ -61,13 +61,19 @@ export default function Grupo({ route, navigation }: any) {
     const unsubFocus = navigation.addListener('focus', () => {
       if (isOnline) {
         refreshMembers();
+        // Refrescar deudas o gastos según la pestaña activa
+        if (activeTab === 'deudas') {
+          fetchDebts();
+        } else if (activeTab === 'gastos') {
+          fetchGroupExpenses();
+        }
       }
     });
     return () => {
       unsubBlur();
       unsubFocus();
     };
-  }, [grupoId, isOnline]);
+  }, [grupoId, isOnline, activeTab]);
 
   useEffect(() => {
     if (activeTab === 'deudas') {
@@ -191,6 +197,8 @@ export default function Grupo({ route, navigation }: any) {
       await refreshMembers();
       if (activeTab === 'gastos') {
         await fetchGroupExpenses();
+      } else if (activeTab === 'deudas') {
+        await fetchDebts();
       }
       setRefreshing(false);
     }
@@ -204,7 +212,7 @@ export default function Grupo({ route, navigation }: any) {
       {/* Header Fijo (con Safe Area) */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.back}>{'‹'}</Text>
+          <Feather name="arrow-left" size={24} color={colors.iconColor} />
         </TouchableOpacity>
         <View style={styles.headerTitleContainer}>
           <View style={styles.headerTitleRow}>
@@ -582,12 +590,6 @@ const getStyles = (colors: any, insets: any) => StyleSheet.create({
     backgroundColor: colors.modalBackground,
     borderBottomWidth: 1,
     borderBottomColor: colors.borderLight,
-  },
-  back: {
-    fontSize: 28,
-    color: colors.text,
-    width: 32,
-    fontWeight: '300',
   },
   headerTitleContainer: {
     flex: 1,

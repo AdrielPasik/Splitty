@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, RefreshControl } from 'react-native';
 import { useGastos } from '../viewmodels/useGastos';
 import { useIsFocused } from '@react-navigation/native';
 import { useTheme } from '../contexts/ThemeContext';
@@ -11,10 +11,27 @@ export default function Gastos() {
   const styles = getStyles(colors);
   const { data, loading, error, refresh, fromCache } = useGastos();
   const isFocused = useIsFocused();
+  const lastRefreshRef = React.useRef<number>(0);
+  const [refreshing, setRefreshing] = React.useState(false);
 
   React.useEffect(() => {
-    if (isFocused) refresh();
+    if (isFocused) {
+      const now = Date.now();
+      const timeSinceLastRefresh = now - lastRefreshRef.current;
+      // Solo refrescar si han pasado más de 30 segundos desde el último refresh
+      if (timeSinceLastRefresh > 30000) {
+        refresh();
+        lastRefreshRef.current = now;
+      }
+    }
   }, [isFocused]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refresh();
+    lastRefreshRef.current = Date.now();
+    setRefreshing(false);
+  };
 
   if (loading) return (
     // Se usan los estilos definidos dinámicamente
@@ -42,6 +59,14 @@ export default function Gastos() {
       <FlatList
         data={data}
         keyExtractor={(item, idx) => item.id?.toString() || idx.toString()}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }
         renderItem={({ item }) => (
           <View style={styles.card}>
             {/* Contenedor principal de la fila, asegurando espacio entre elementos */}

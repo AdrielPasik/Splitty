@@ -8,6 +8,7 @@ export function useInvitarMiembro(grupoId?: string) {
   const [loadingInvite, setLoadingInvite] = useState(false);
   const [friends, setFriends] = useState<any[]>([]);
   const [loadingFriends, setLoadingFriends] = useState(false);
+  const [groupMembers, setGroupMembers] = useState<any[]>([]);
 
   const fetchInvite = async () => {
     if (!grupoId) return;
@@ -28,12 +29,29 @@ export function useInvitarMiembro(grupoId?: string) {
     }
   };
 
+  const fetchGroupMembers = async () => {
+    if (!grupoId) return;
+    try {
+      const res = await groupsApi.getGroupMembers(grupoId);
+      const members = Array.isArray(res) ? res : res?.members ?? [];
+      setGroupMembers(members);
+    } catch (e) {
+      console.error('getGroupMembers error', e);
+      setGroupMembers([]);
+    }
+  };
+
   const fetchFriends = async () => {
     setLoadingFriends(true);
     try {
       const res = await friendsApi.getFriends();
       const arr = Array.isArray(res) ? res : res?.friends ?? [];
-      setFriends(arr);
+
+      // Filtrar amigos que ya son miembros del grupo
+      const memberIds = new Set(groupMembers.map((m: any) => m.id || m.usuario_id));
+      const availableFriends = arr.filter((friend: any) => !memberIds.has(friend.id));
+
+      setFriends(availableFriends);
     } catch (e) {
       console.error('getFriends error', e);
       setFriends([]);
@@ -44,12 +62,21 @@ export function useInvitarMiembro(grupoId?: string) {
 
   useEffect(() => {
     fetchInvite();
-    fetchFriends();
+    fetchGroupMembers();
   }, [grupoId]);
+
+  useEffect(() => {
+    if (groupMembers.length >= 0) {
+      fetchFriends();
+    }
+  }, [groupMembers]);
 
   const addMember = async (friendId: string) => {
     if (!grupoId) throw new Error('NO_GROUP_ID');
-    return groupsApi.addMembers(grupoId, [friendId]);
+    const result = await groupsApi.addMembers(grupoId, [friendId]);
+    // Refrescar miembros del grupo y lista de amigos después de agregar
+    await fetchGroupMembers();
+    return result;
   };
 
   return { 

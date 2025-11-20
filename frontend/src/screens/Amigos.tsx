@@ -68,10 +68,11 @@ const Amigos = ({ navigation }: any) => {
 
         try {
             if (isOnline) {
-                // Usar datos online del viewmodel
-                const refreshed = await refreshOnline();
-                setFriends(refreshed || onlineFriends || []);
-                setPendingRequests(onlinePendingRequests || []);
+                // Usar datos online del viewmodel y refrescar
+                const result = await refreshOnline();
+                // Usar los datos retornados directamente
+                setFriends(result?.friends || onlineFriends || []);
+                setPendingRequests(result?.pendingRequests || onlinePendingRequests || []);
                 setFromCache(false);
             } else {
                 // Cargar datos offline
@@ -111,6 +112,15 @@ const Amigos = ({ navigation }: any) => {
             })();
         }
     }, []);
+
+    // Sincronizar estados locales con el viewmodel cuando cambian (solo si estamos online)
+    useEffect(() => {
+        if (isOnline && !loading) {
+            setFriends(onlineFriends || []);
+            setPendingRequests(onlinePendingRequests || []);
+            setFromCache(false);
+        }
+    }, [onlineFriends, onlinePendingRequests, isOnline]);
 
     // Recargar al volver a la pantalla si estamos online
     useEffect(() => {
@@ -161,9 +171,7 @@ const Amigos = ({ navigation }: any) => {
             setFriendIdToAdd('');
             setAddFriendVisible(false);
             Alert.alert('Listo', 'Solicitud enviada correctamente');
-
-            // Recargar lista
-            await loadData(true);
+            // El useEffect sincronizará automáticamente los estados con el viewmodel
         } catch (err: any) {
             console.error('Error al invitar/agregar amigo', err);
 
@@ -202,7 +210,7 @@ const Amigos = ({ navigation }: any) => {
                     onPress: async () => {
                         try {
                             await removeFriend(friend.id);
-                            await loadData(true);
+                            // El useEffect sincronizará automáticamente los estados con el viewmodel
                         } catch (e) {
                             Alert.alert('Error', 'No se pudo eliminar al amigo.');
                         }
@@ -220,7 +228,7 @@ const Amigos = ({ navigation }: any) => {
         }
         try {
             await acceptPending(requestId);
-            await loadData(true);
+            // El useEffect sincronizará automáticamente los estados con el viewmodel
         } catch (e) {
             Alert.alert('Error', 'No se pudo aceptar la solicitud.');
         }
@@ -234,7 +242,7 @@ const Amigos = ({ navigation }: any) => {
         }
         try {
             await rejectPending(requestId);
-            await loadData(true);
+            // El useEffect sincronizará automáticamente los estados con el viewmodel
         } catch (e) {
             Alert.alert('Error', 'No se pudo rechazar la solicitud.');
         }

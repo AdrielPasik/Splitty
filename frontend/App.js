@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import PantallaBienvenida from './src/screens/PantallaBienvenida';
 import InicioSesion from './src/screens/InicioSesion';
 import CrearCuenta from './src/screens/CrearCuenta';
+import RestablecerContraseña from './src/screens/RestablecerContraseña';
 import CrearGrupo from './src/screens/CrearGrupo';
 import UnirseGrupo from './src/screens/UnirseGrupo';
 import Grupo from './src/screens/Grupo';
@@ -161,6 +162,7 @@ function AppNavigator() {
           <Stack.Screen key="PantallaBienvenida" name="PantallaBienvenida" component={PantallaBienvenida} />
           <Stack.Screen key="InicioSesion" name="InicioSesion" component={InicioSesion} />
           <Stack.Screen key="CrearCuenta" name="CrearCuenta" component={CrearCuenta} />
+          <Stack.Screen key="RestablecerContraseña" name="RestablecerContraseña" component={RestablecerContraseña} />
         </>
       )}
     </Stack.Navigator>

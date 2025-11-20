@@ -153,11 +153,28 @@ export function useAmigos() {
     }, [fetchFriends]);
 
     const refreshAll = useCallback(async () => {
-            // Ejecutamos ambas cargas y retornamos la lista de amigos actualizada
+            // Ejecutamos ambas cargas
             const friendsResult = await fetchFriends();
-            await fetchPending();
-            return friendsResult;
-        }, [fetchFriends, fetchPending]);
+
+            // Obtener solicitudes pendientes manualmente
+            let pendingResult: any[] = [];
+            try {
+                const rows = await getPendingReceived();
+                pendingResult = (rows || []).map((r: any) => ({
+                    id: r.solicitudId || r.solicitud_id || r.id,
+                    solicitanteId: r.solicitanteId || r.solicitante_id || r.fromId,
+                    solicitanteNombre: r.solicitanteNombre || r.solicitante_nombre || r.solicitanteNombre || r.solicitante_nombre || r.nombre || r.fromName,
+                    solicitanteCorreo: r.solicitanteCorreo || r.solicitante_correo || r.correo || r.fromEmail,
+                    solicitanteFotoUrl: r.solicitanteFotoUrl || null,
+                    fecha: r.fecha || r.createdAt || r.created_at,
+                }));
+                setPendingRequests(pendingResult);
+            } catch (err) {
+                console.error('Error en refreshAll obteniendo pending', err);
+            }
+
+            return { friends: friendsResult, pendingRequests: pendingResult };
+        }, [fetchFriends]);
 
     const acceptPending = useCallback(async (solicitudId: string) => {
         try {

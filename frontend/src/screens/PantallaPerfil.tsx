@@ -319,8 +319,14 @@ export default function PantallaPerfil({ navigation }: any) {
         // let the server handle uniqueness
       }
 
-      await updateUser({ clave_pago: newClave.trim() });
+      const updatedUser = await updateUser({ clave_pago: newClave.trim() });
       setClavePago(newClave.trim());
+
+      // 🔥 FIX: Sincronizar foto de perfil si viene en la respuesta
+      if (updatedUser?.foto_url && user?.uid) {
+        setProfileImage(updatedUser.foto_url);
+      }
+
       setShowClaveModal(false);
       Alert.alert('Éxito', 'Alias/CVU actualizado correctamente');
     } catch (error: any) {
@@ -408,8 +414,14 @@ export default function PantallaPerfil({ navigation }: any) {
 
     setLoading(true);
     try {
-      await updateUser({ nombre: newName.trim() });
+      const updatedUser = await updateUser({ nombre: newName.trim() });
       setNombre(newName.trim());
+
+      // 🔥 FIX: Sincronizar foto de perfil si viene en la respuesta
+      if (updatedUser?.foto_url && user?.uid) {
+        setProfileImage(updatedUser.foto_url);
+      }
+
       setShowNameModal(false);
       Alert.alert('Éxito', 'Nombre actualizado correctamente');
     } catch (error: any) {
