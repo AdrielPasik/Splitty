@@ -7,7 +7,7 @@ import { Linking } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import Constants from 'expo-constants';
-import { uploadReceipt, uploadReceiptUrl } from '../api/balances';
+import { uploadReceipt } from '../api/balances';
 import { useTheme } from '../contexts/ThemeContext';
 import { createSettlement } from '../api/settlements';
 
@@ -250,9 +250,13 @@ export default function DebtDetail({ route, navigation }: any) {
           desde_usuario: acreedorId,
           hacia_usuario: deudorId,
           importe: Number(debt?.importe || 0),
-          fecha_pago: new Date().toISOString().slice(0, 10)
+          fecha_pago: new Date().toISOString().slice(0, 10),
         });
         setUploadedUrl(resp?.url || null);
+
+        // 👇 limpiamos la previsualización local para no duplicar vistas
+        setLocalUri(null);
+
         Alert.alert('Comprobante subido', 'El comprobante se subió correctamente.');
       } catch (err: any) {
         console.error('upload error', err);
@@ -311,7 +315,7 @@ export default function DebtDetail({ route, navigation }: any) {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Acciones rápidas</Text>
 
-        <TouchableOpacity style={styles.buttonSecondary} onPress={copyAndOpenMP}>
+          <TouchableOpacity style={styles.buttonSecondary} onPress={copyAndOpenMP}>
             <Feather name="dollar-sign" size={18} color={colors.primaryText} />
             <Text style={styles.buttonText}>Copiar alias y abrir Mercado Pago</Text>
           </TouchableOpacity>
@@ -321,46 +325,40 @@ export default function DebtDetail({ route, navigation }: any) {
         <View style={styles.receiptSection}>
           <Text style={styles.sectionTitle}>Comprobante de pago</Text>
 
-          {/* PLACEHOLDER → siempre arriba */}
+          {/* SIEMPRE mostrar opción para subir */}
           <TouchableOpacity
-            style={[styles.uploadPlaceholder, { marginBottom: 20 }]}
+            style={localUri ? styles.previewContainer : styles.uploadPlaceholder}
             onPress={pickAndUpload}
             disabled={uploading}
           >
+            {localUri && (
+              <>
+                <Text style={styles.previewLabel}>Previsualización</Text>
+                <Image
+                  source={{ uri: localUri }}
+                  style={styles.receiptImage}
+                  resizeMode="contain"
+                />
+              </>
+            )}
+
             {uploading ? (
               <>
                 <ActivityIndicator color={colors.primary} size="large" />
                 <Text style={styles.uploadPlaceholderText}>Subiendo...</Text>
               </>
-            ) : (
+            ) : !localUri ? (
               <>
                 <Feather name="upload-cloud" size={48} color={colors.textMuted} />
                 <Text style={styles.uploadPlaceholderText}>
                   Toca para seleccionar un comprobante{'\n'}de tu galería
                 </Text>
               </>
-            )}
+            ) : null}
           </TouchableOpacity>
 
-          {/* PREVISUALIZACIÓN */}
-          {localUri && (
-            <View style={styles.previewContainer}>
-              <Text style={styles.previewLabel}>Previsualización</Text>
-              <Image source={{ uri: localUri }} style={styles.receiptImage} resizeMode="contain" />
-
-              {uploading ? (
-                <ActivityIndicator color={colors.primary} size="large" />
-              ) : (
-                <TouchableOpacity style={styles.buttonPrimary} onPress={pickAndUpload}>
-                  <Feather name="upload" size={18} color={colors.primaryText} />
-                  <Text style={styles.buttonText}>Subir comprobante</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
-
-          {/* COMPROBANTE SUBIDO */}
-          {uploadedUrl && (
+          {/* Mostrar comprobante subido solo si NO hay previsualización local */}
+          {uploadedUrl && !localUri && (
             <View style={styles.uploadedContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                 <Feather
@@ -373,11 +371,15 @@ export default function DebtDetail({ route, navigation }: any) {
                   Comprobante subido
                 </Text>
               </View>
-
-              <Image source={{ uri: uploadedUrl }} style={styles.receiptImage} resizeMode="contain" />
+              <Image
+                source={{ uri: uploadedUrl }}
+                style={styles.receiptImage}
+                resizeMode="contain"
+              />
             </View>
           )}
         </View>
+
       </ScrollView>
     </View>
   );
