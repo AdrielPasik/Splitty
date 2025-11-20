@@ -397,22 +397,6 @@ export default function CrearCuenta({ navigation }: any) {
           )}
         </TouchableOpacity>
 
-        {/* Separador */}
-        <View style={styles.separatorContainer}>
-          <View style={styles.separator} />
-          <Text style={styles.separatorText}>O continúa con</Text>
-          <View style={styles.separator} />
-        </View>
-
-        {/* Botón Google */}
-        <TouchableOpacity
-          style={[styles.googleButton, loading && styles.buttonDisabled]}
-          disabled={loading}
-          onPress={() => Alert.alert('Próximamente', 'Login con Google estará disponible pronto')}
-        >
-          <Text style={styles.googleButtonText}>Continuar con Google</Text>
-        </TouchableOpacity>
-
         {/* Footer */}
         <View style={styles.footerContainer}>
           <Text style={styles.footerText}>¿Ya tienes cuenta? </Text>
@@ -529,35 +513,6 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#FFF',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  separatorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    width: '100%',
-  },
-  separator: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#DDD',
-  },
-  separatorText: {
-    marginHorizontal: 12,
-    color: '#999',
-    fontSize: 14,
-  },
-  googleButton: {
-    width: '100%',
-    backgroundColor: '#DDD',
-    padding: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  googleButtonText: {
-    color: '#555',
     fontWeight: '600',
     fontSize: 16,
   },

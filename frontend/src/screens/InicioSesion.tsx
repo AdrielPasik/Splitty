@@ -115,21 +115,6 @@ export default function InicioSesion({ navigation }: any) {
                 <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
               )}
             </TouchableOpacity>
-
-            <View style={styles.orContainer}>
-              <View style={styles.line} />
-              <Text style={styles.orText}>O continúa con</Text>
-              <View style={styles.line} />
-            </View>
-
-            <TouchableOpacity style={styles.googleButton} onPress={() => {}}>
-              <Image
-                source={{ uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Google_%22G%22_Logo.svg/512px-Google_%22G%22_Logo.svg.png" }}
-                style={styles.googleIcon}
-                resizeMode="contain"
-              />
-              <Text style={styles.googleButtonText}>Continuar con Google</Text>
-            </TouchableOpacity>
           </View>
 
           <View style={styles.createAccountContainer}>
@@ -236,40 +221,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '700'
-  },
-  orContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E0E0E0'
-  },
-  orText: {
-    marginHorizontal: 12,
-    fontSize: 12,
-    color: '#555555'
-  },
-  googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16
-  },
-  googleIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 12
-  },
-  googleButtonText: {
-    fontSize: 14,
-    color: '#212121',
-    fontWeight: '600'
   },
   createAccountContainer: {
     flexDirection: 'row',
