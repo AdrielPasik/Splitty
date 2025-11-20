@@ -2,6 +2,7 @@
   "expo": {
     "name": "Splitty",
     "slug": "Splitty",
+    "owner": "santitanus",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/splittyLogo.png",
@@ -59,8 +60,8 @@
         {
           "android": {
             "minSdkVersion": 24,
-            "targetSdkVersion": 34,
-            "compileSdkVersion": 34,
+            "targetSdkVersion": 35,
+            "compileSdkVersion": 35,
             "proguardMinify": true,
             "enableProguardInReleaseBuilds": true,
             "enableMinifyInReleaseBuilds": true
@@ -71,9 +72,8 @@
     "extra": {
       "BACKEND_URL": "https://splitty-azieva.fly.dev/",
       "eas": {
-        "projectId": "f40eab8a-fedd-44de-b378-996b1639a9a7"
+        "projectId": "d4288f8f-e584-4de7-87eb-facedcec213e"
       }
     }
-  },
-  "projectId": "f40eab8a-fedd-44de-b378-996b1639a9a7"
+  }
 }
