@@ -48,6 +48,11 @@ const lightColors = {
   
   // Icon
   iconColor: '#666',
+
+  // Danger zone
+  dangerBackground: '#FFF5F5',
+  dangerBorder: '#8B0000',
+  dangerText: '#8B0000',
 };
 
 const darkColors = {
@@ -89,6 +94,11 @@ const darkColors = {
   
   // Icon
   iconColor: '#A0ADA8',
+
+  // Danger zone
+  dangerBackground: '#2D0A0A',
+  dangerBorder: '#FF6B6B',
+  dangerText: '#FF6B6B',
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);

@@ -403,7 +403,7 @@ export default function ConfiguracionGrupo({ route, navigation }: any) {
                 style={styles.dangerButton}
                 onPress={handleEliminarGrupo}
               >
-                <Feather name="trash-2" size={20} color="#8B0000" />
+                <Feather name="trash-2" size={20} color={colors.dangerText} />
                 <Text style={styles.dangerButtonText}>
                   Eliminar grupo permanentemente
                 </Text>
@@ -562,7 +562,7 @@ export default function ConfiguracionGrupo({ route, navigation }: any) {
                         style={[styles.memberActionButton, { marginLeft: 8 }]}
                         onPress={() => handleEliminarMiembro(miembro)}
                       >
-                        <Feather name="trash-2" size={18} color="#B00020" />
+                        <Feather name="trash-2" size={18} color={colors.dangerText} />
                       </TouchableOpacity>
                     </View>
                   )}
@@ -594,7 +594,7 @@ export default function ConfiguracionGrupo({ route, navigation }: any) {
                   </TouchableOpacity>
                 </View>
 
-                <Text style={[styles.label, { color: '#B00020', marginBottom: 12 }]}>
+                <Text style={[styles.label, { color: colors.dangerText, marginBottom: 12 }]}>
                   Esta acción es IRREVERSIBLE
                 </Text>
 
@@ -631,7 +631,7 @@ export default function ConfiguracionGrupo({ route, navigation }: any) {
                     style={[
                       styles.modalButton,
                       {
-                        backgroundColor: confirmDeleteText === nombre ? '#8B0000' : colors.borderLight,
+                        backgroundColor: confirmDeleteText === nombre ? colors.dangerBorder : colors.borderLight,
                       },
                     ]}
                     onPress={confirmarEliminacionFinal}
@@ -641,7 +641,7 @@ export default function ConfiguracionGrupo({ route, navigation }: any) {
                       style={[
                         styles.modalButtonTextSave,
                         {
-                          color: confirmDeleteText === nombre ? '#FFF' : colors.textMuted,
+                          color: confirmDeleteText === nombre ? colors.primaryText : colors.textMuted,
                         },
                       ]}
                     >
@@ -707,7 +707,7 @@ const getStyles = (colors: any) => StyleSheet.create({
   dangerSectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#B00020',
+    color: colors.dangerText,
     marginBottom: 12,
   },
   sectionLink: {
@@ -936,18 +936,18 @@ const getStyles = (colors: any) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#FFF5F5',
+    backgroundColor: colors.dangerBackground,
     borderRadius: 12,
     padding: 16,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#8B0000',
+    borderColor: colors.dangerBorder,
     gap: 8,
   },
   dangerButtonText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#8B0000',
+    color: colors.dangerText,
   },
   modalOverlay: {
     flex: 1,
